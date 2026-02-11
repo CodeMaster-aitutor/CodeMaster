@@ -1,0 +1,32 @@
+graph LR
+  %% Level-0 DFD: Compiler Feature
+  User["External Entity: User"]
+
+  %% Processes
+  P1["Process: Edit Code"]
+  P2["Process: Detect Syntax Errors"]
+  P3["Process: Compile & Execute Java"]
+  P4["Process: Manage Output"]
+  P5["Process: Export Actions (Copy/Share/Download)"]
+
+  %% Data Stores
+  DS_Code["Data Store: Editor Buffer"]
+  DS_Errors["Data Store: Syntax Errors"]
+  DS_Output["Data Store: Execution Output"]
+
+  %% Flows
+  User -- Type code / cursor moves --> P1
+  P1 -- Updated source code --> DS_Code
+  P1 -- Code changes --> P2
+  P2 -- Error list (⚠ per line) --> DS_Errors
+  P2 -- Error indicators --> User
+
+  P1 -- Runnable source --> P3
+  P3 -- Execution output --> DS_Output
+  P3 -- Status / toasts --> User
+
+  DS_Output -- Display output --> P4
+  P4 -- Rendered output --> User
+
+  P4 -- Output payload --> P5
+  P5 -- Copied/shared/downloaded content --> User

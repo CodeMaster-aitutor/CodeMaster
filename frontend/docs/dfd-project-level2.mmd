@@ -1,0 +1,49 @@
+graph LR
+  %% Level-2 DFD: Code Generator Process Breakdown (Simplified)
+  
+  %% External Entity
+  User[User]
+  
+  %% Central Process from Level-1 (being decomposed)
+  GeneratorProcess(("Code<br/>Generator<br/>Process"))
+  
+  %% Sub-processes (breaking down Code Generator Process)
+  InputHandler(("Input<br/>Handler"))
+  MessageManager(("Message<br/>Manager"))
+  AIGenerator(("AI Code<br/>Generator"))
+  ResponseProcessor(("Response<br/>Processor"))
+  ActionHandler(("Action<br/>Handler"))
+  
+  %% Data Stores
+  ChatHistory[Chat History]
+  MessageBuffer[Message Buffer]
+  GeneratedCode[Generated Code]
+  UserPreferences[User Preferences]
+  
+  %% User interactions
+  User -->|Text/Voice Input| InputHandler
+  User -->|Chat Actions| ActionHandler
+  
+  %% Process flows
+  InputHandler -->|Validated Input| MessageManager
+  MessageManager -->|User Message| MessageBuffer
+  MessageBuffer -->|Request| AIGenerator
+  AIGenerator -->|Generated Response| ResponseProcessor
+  ResponseProcessor -->|Formatted Output| User
+  
+  %% Message management flows
+  MessageManager -->|Save Conversation| ChatHistory
+  ChatHistory -->|Load History| MessageManager
+  MessageManager -->|Display Messages| User
+  
+  %% AI Generation flows
+  AIGenerator -->|Code Output| GeneratedCode
+  GeneratedCode -->|Code Content| ResponseProcessor
+  
+  %% Action handling flows
+  ActionHandler -->|Copy/Share/Regenerate| GeneratedCode
+  ActionHandler -->|Feedback| UserPreferences
+  ActionHandler -->|Action Results| User
+  
+  %% User preferences
+  UserPreferences -->|Settings| AIGenerator

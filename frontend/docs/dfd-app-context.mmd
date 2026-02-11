@@ -1,0 +1,17 @@
+graph LR
+  %% Context Diagram: CodeMaster Web App
+  %% External Entities
+  User["External Entity: User"]
+  Clipboard["External Entity: Browser Clipboard"]
+  FileSys["External Entity: Local File System"]
+
+  %% System Boundary
+  App[("System: CodeMaster Web App")]
+
+  %% Flows
+  User -- Interact via UI: edit, run, navigate --> App
+  App -- Copy output / share content --> Clipboard
+  Clipboard -- Copied data --> User
+
+  App -- Download .java files --> FileSys
+  FileSys -- Downloaded files --> User

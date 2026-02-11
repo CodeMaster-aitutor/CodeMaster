@@ -1,0 +1,279 @@
+import React, { useState, useEffect } from 'react';
+import AppLayout from '@/components/layout/AppLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { 
+  BarChart3, 
+  TrendingUp, 
+  Clock, 
+  Target, 
+  Code, 
+  CheckCircle,
+  XCircle,
+  Calendar,
+  Loader2
+} from 'lucide-react';
+import { analyticsAPI } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
+
+const Analytics = () => {
+  const [stats, setStats] = useState({
+    totalProblems: 0,
+    solvedProblems: 0,
+    successRate: 0,
+    averageTime: 0,
+    streak: 0,
+    weeklyGoal: 10,
+    weeklyProgress: 0
+  });
+
+  const [recentActivity, setRecentActivity] = useState<Array<{
+    date: string;
+    problems: number;
+    time: number;
+    success: boolean;
+  }>>([]);
+
+  const [skillProgress, setSkillProgress] = useState<Array<{
+    skill: string;
+    completed: number;
+    total: number;
+    percentage: number;
+  }>>([]);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalyticsData = async () => {
+      setIsLoading(true);
+      try {
+        const [overviewResponse, progressResponse] = await Promise.all([
+          analyticsAPI.getOverview(),
+          analyticsAPI.getProgress()
+        ]);
+
+        // Update stats from API response
+        setStats({
+          totalProblems: overviewResponse.total_compilations || 0,
+          solvedProblems: Math.round((overviewResponse.success_rate / 100) * (overviewResponse.total_compilations || 0)),
+          successRate: overviewResponse.success_rate || 0,
+          averageTime: Math.round(overviewResponse.average_execution_time || 0),
+          streak: 0, // Could be calculated from activity
+          weeklyGoal: 10,
+          weeklyProgress: 0 // Could be calculated from weekly activity
+        });
+
+        // Format weekly activity from progress response
+        if (progressResponse.weekly_activity) {
+          const formattedActivity = progressResponse.weekly_activity.map(activity => ({
+            date: formatDate(activity.date),
+            problems: activity.count,
+            time: activity.count * 10, // Estimated time
+            success: true
+          }));
+          setRecentActivity(formattedActivity);
+        }
+
+        // Format skill progress from progress response
+        if (progressResponse.skill_progress) {
+          const formattedProgress = progressResponse.skill_progress.map(skill => ({
+            skill: skill.skill,
+            completed: skill.level,
+            total: skill.max_level,
+            percentage: Math.round((skill.level / skill.max_level) * 100)
+          }));
+          setSkillProgress(formattedProgress);
+        }
+      } catch (error) {
+        console.error('Failed to fetch analytics data:', error);
+        toast({
+          title: "Failed to load analytics",
+          description: error instanceof Error ? error.message : 'Please try again later.',
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAnalyticsData();
+  }, []);
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    });
+  };
+
+  return (
+    <AppLayout>
+      <div className="p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Analytics Dashboard</h1>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-3 text-muted-foreground">Loading analytics...</span>
+          </div>
+        ) : (
+          <>
+
+        {/* Key Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <Target className="h-8 w-8 text-primary" />
+                <div>
+                  <div className="text-2xl font-bold">{stats.solvedProblems}</div>
+                  <div className="text-sm text-muted-foreground">Problems Solved</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-8 w-8 text-green-500" />
+                <div>
+                  <div className="text-2xl font-bold">{stats.successRate}%</div>
+                  <div className="text-sm text-muted-foreground">Success Rate</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <Clock className="h-8 w-8 text-blue-500" />
+                <div>
+                  <div className="text-2xl font-bold">{stats.averageTime}m</div>
+                  <div className="text-sm text-muted-foreground">Avg. Solve Time</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-8 w-8 text-orange-500" />
+                <div>
+                  <div className="text-2xl font-bold">{stats.streak}</div>
+                  <div className="text-sm text-muted-foreground">Day Streak</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Weekly Goal Progress */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <BarChart3 className="h-5 w-5" />
+                <span>Weekly Goal</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between text-sm">
+                <span>Problems solved this week</span>
+                <span>{stats.weeklyProgress}/{stats.weeklyGoal}</span>
+              </div>
+              <Progress value={(stats.weeklyProgress / stats.weeklyGoal) * 100} className="h-3" />
+              <div className="text-sm text-muted-foreground">
+                {stats.weeklyGoal - stats.weeklyProgress} more problems to reach your weekly goal
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentActivity.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No recent activity data available</p>
+                  </div>
+                ) : (
+                  recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center space-x-3">
+                      {activity.success ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      <div>
+                        <div className="font-medium">{activity.date}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {activity.problems} problems, {activity.time}min
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Skill Progress */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Code className="h-5 w-5" />
+              <span>Skill Progress</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {skillProgress.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Code className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="font-medium">No skill progress data available</p>
+                  <p className="text-sm mt-1">Complete challenges to track your progress!</p>
+                </div>
+              ) : (
+                skillProgress.map((skill, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{skill.skill}</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-muted-foreground">
+                        {skill.completed}/{skill.total}
+                      </span>
+                      <Badge variant={skill.percentage === 100 ? "default" : "secondary"}>
+                        {skill.percentage}%
+                      </Badge>
+                    </div>
+                  </div>
+                  <Progress value={skill.percentage} className="h-2" />
+                </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        </>
+        )}
+      </div>
+    </AppLayout>
+  );
+};
+
+export default Analytics;

@@ -1,0 +1,30 @@
+flowchart LR
+  %% Level-0 DFD: CodeMaster System
+  
+  %% External Entities
+  User[User]
+  Admin[Admin]
+  
+  %% Main System
+  CodeMaster(("CodeMaster<br/>System"))
+  
+  %% User Data Flows
+  User -->|Code Input| CodeMaster
+  User -->|Compile Request| CodeMaster
+  User -->|Generate Request| CodeMaster
+  CodeMaster -->|Execution Results| User
+  CodeMaster -->|Generated Code| User
+  CodeMaster -->|Code Explanations| User
+  
+  %% Admin Data Flows
+  Admin -->|User Management| CodeMaster
+  Admin -->|System Config| CodeMaster
+  CodeMaster -->|Usage Analytics| Admin
+  CodeMaster -->|System Status| Admin
+  
+  %% Styling
+  classDef entityStyle fill:#2d5a2d,stroke:#000,stroke-width:2px,color:#fff
+  classDef systemStyle fill:#2d5a2d,stroke:#000,stroke-width:3px,color:#fff
+  
+  class User,Admin entityStyle
+  class CodeMaster systemStyle

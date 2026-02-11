@@ -1,0 +1,41 @@
+graph LR
+  %% Level-1 DFD: CodeMaster System Breakdown (Simplified)
+  
+  %% External Entity
+  User[User]
+  
+  %% Core Processes (Circles)
+  Compiler(("Code<br/>Compiler<br/>Process"))
+  Generator(("Code<br/>Generator<br/>Process"))
+  Explainer(("Code<br/>Explainer<br/>Process"))
+  Assessment(("Assessment<br/>Process"))
+  
+  %% Data Stores
+  CodeStorage[Code Storage]
+  OutputStorage[Output Storage]
+  UserPrefs[User Preferences]
+  
+  %% User to Processes
+  User --> Compiler
+  User --> Generator
+  User --> Explainer
+  User --> Assessment
+  
+  %% Processes to User
+  Compiler --> User
+  Generator --> User
+  Explainer --> User
+  Assessment --> User
+  
+  %% Process to Data Store connections
+  Compiler --> CodeStorage
+  CodeStorage --> Compiler
+  
+  Compiler --> OutputStorage
+  OutputStorage --> Compiler
+  
+  Generator --> CodeStorage
+  Explainer --> CodeStorage
+  
+  Assessment --> UserPrefs
+  UserPrefs --> Assessment

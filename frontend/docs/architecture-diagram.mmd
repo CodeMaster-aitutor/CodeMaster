@@ -1,0 +1,127 @@
+flowchart TB
+  %% CodeMaster System Architecture - Modern Design
+  
+  subgraph PL ["Presentation Layer"]
+    direction TB
+    subgraph RC ["React Components"]
+      direction LR
+      Landing["Landing Page"]
+      Dashboard["Dashboard"]
+      Compiler["Code Compiler"]
+      Generator["AI Generator"]
+      Explainer["Code Explainer"]
+      Assessment["Assessment"]
+      Practice["Practice Arena"]
+      Analytics["Analytics"]
+      Profile["Profile"]
+      Settings["Settings"]
+      Help["Help & Support"]
+    end
+    
+    subgraph UF ["UI Framework"]
+      direction LR
+      React["React 18"]
+      Router["React Router"]
+      ShadcnUI["shadcn/ui"]
+      Tailwind["Tailwind CSS"]
+    end
+  end
+  
+  subgraph AL ["Application Layer"]
+    direction TB
+    subgraph SM ["State Management"]
+      direction LR
+      TanstackQuery["Tanstack Query"]
+      LocalState["Local State"]
+      Context["React Context"]
+    end
+    
+    subgraph CS ["Core Services"]
+      direction LR
+      CodeService["Code Execution"]
+      AIService["AI Generation"]
+      AuthService["Authentication"]
+      StorageService["Storage"]
+    end
+    
+    subgraph UT ["Utilities"]
+      direction LR
+      Hooks["Custom Hooks"]
+      Utils["Utils"]
+      Validation["Validation"]
+    end
+  end
+  
+  subgraph DL ["Data Layer"]
+    direction TB
+    subgraph CLS ["Client Storage"]
+      direction LR
+      LocalStorage["LocalStorage"]
+      SessionStorage["SessionStorage"]
+      InMemory["Memory Cache"]
+    end
+    
+    subgraph EA ["External APIs"]
+      direction LR
+      CodeAPI["Code API"]
+      AIAPI["AI API"]
+      AuthAPI["Auth API"]
+    end
+  end
+  
+  subgraph IL ["Infrastructure Layer"]
+    direction TB
+    subgraph BT ["Build Tools"]
+      direction LR
+      Vite["Vite"]
+      TypeScript["TypeScript"]
+      ESLint["ESLint"]
+    end
+    
+    subgraph DEV ["Development"]
+      direction LR
+      DevServer["Dev Server"]
+      HMR["Hot Reload"]
+      Preview["Preview"]
+    end
+  end
+  
+  %% Modern Connections
+  Landing -.->|"Loads"| TanstackQuery
+  Dashboard -.->|"Fetches"| TanstackQuery
+  Compiler -.->|"Executes"| CodeService
+  Generator -.->|"Generates"| AIService
+  Assessment -.->|"Stores"| StorageService
+  
+  TanstackQuery ==>|"API Calls"| CodeAPI
+  TanstackQuery ==>|"AI Requests"| AIAPI
+  AuthService ==>|"Auth Flow"| AuthAPI
+  StorageService ==>|"Persists"| LocalStorage
+  
+  CodeService -.->|"Caches"| LocalStorage
+  AIService -.->|"Uses"| InMemory
+  
+  React -.->|"Styles"| Tailwind
+  React -.->|"Components"| ShadcnUI
+  Router -.->|"Navigation"| React
+  
+  Vite -.->|"Builds"| React
+  TypeScript -.->|"Types"| React
+  ESLint -.->|"Lints"| TypeScript
+  
+  %% Modern Styling with Gradients and Professional Colors
+  classDef presentationStyle fill:#667eea,stroke:#764ba2,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+  classDef applicationStyle fill:#f093fb,stroke:#f5576c,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+  classDef dataStyle fill:#4facfe,stroke:#00f2fe,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+  classDef infrastructureStyle fill:#43e97b,stroke:#38f9d7,stroke-width:3px,color:#fff,font-weight:bold,font-size:14px
+  classDef componentStyle fill:#ffecd2,stroke:#fcb69f,stroke-width:2px,color:#333,font-weight:500,font-size:12px
+  classDef serviceStyle fill:#a8edea,stroke:#fed6e3,stroke-width:2px,color:#333,font-weight:500,font-size:12px
+  classDef frameworkStyle fill:#d299c2,stroke:#fef9d7,stroke-width:2px,color:#333,font-weight:500,font-size:12px
+  
+  class PL,RC,UF presentationStyle
+  class AL,SM,CS,UT applicationStyle
+  class DL,CLS,EA dataStyle
+  class IL,BT,DEV infrastructureStyle
+  class Landing,Dashboard,Compiler,Generator,Explainer,Assessment,Practice,Analytics,Profile,Settings,Help componentStyle
+  class CodeService,AIService,AuthService,StorageService,TanstackQuery,LocalState,Context serviceStyle
+  class React,Router,ShadcnUI,Tailwind,Vite,TypeScript,ESLint,DevServer,HMR,Preview frameworkStyle

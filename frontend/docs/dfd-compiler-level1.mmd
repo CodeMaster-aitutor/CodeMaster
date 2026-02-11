@@ -1,0 +1,32 @@
+graph LR
+  %% Level-1 DFD: Compiler Internals (decomposition of Compile & Execute Java)
+  User["External Entity: User"]
+
+  %% Data Stores
+  DS_Code["Data Store: Editor Buffer"]
+  DS_Errors["Data Store: Syntax Errors"]
+  DS_Output["Data Store: Execution Output"]
+
+  %% Sub-Processes of Compile & Execute
+  SP1["Process: Validate Structure (main method, braces, semicolons)"]
+  SP2["Process: Parse System.out.println statements"]
+  SP3["Process: Build Execution Output"]
+  SP4["Process: Toast Notifications (success/error)"]
+  SP5["Process: Scroll Sync & Line Numbers"]
+  SP6["Process: Cursor Tracking & Restore"]
+
+  %% Flows
+  User -- Run --> SP1
+  DS_Code -- Current source --> SP1
+  SP1 -- Syntax issues --> DS_Errors
+  SP1 -- Validated source --> SP2
+
+  SP2 -- Parsed messages --> SP3
+  SP3 -- Output text --> DS_Output
+
+  SP4 -- Status messages --> User
+  SP5 -- scrollTop, line indicators --> User
+  SP6 -- caret position, selection --> User
+
+  %% Display output
+  DS_Output -- Rendered console output --> User

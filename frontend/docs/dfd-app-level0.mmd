@@ -1,0 +1,32 @@
+graph LR
+  %% Level-0 DFD: CodeMaster Web App
+  User["External Entity: User"]
+
+  %% Processes
+  P1["Process: Editor & Compiler"]
+  P2["Process: Generator"]
+  P3["Process: Explainer"]
+  P4["Process: Assessment"]
+  P5["Process: UI Layout & Navigation"]
+
+  %% Data Stores
+  DS1["Data Store: LocalStorage (sidebar-collapsed)"]
+  DS2["Data Store: In-memory Editor Buffer"]
+  DS3["Data Store: In-memory Output Logs"]
+
+  %% Flows
+  User -- Edit code --> P1
+  User -- Run Java --> P1
+  User -- Generate snippets --> P2
+  User -- Get explanations --> P3
+  User -- Attempt quizzes --> P4
+  User -- Navigate / Fullscreen --> P5
+
+  P5 -- Persist UI state --> DS1
+  P1 -- Source code --> DS2
+  P1 -- Execution output --> DS3
+  P1 -- Copy/Share/Download --> User
+
+  P2 -- Generated content --> User
+  P3 -- Explanation output --> User
+  P4 -- Assessment results --> User

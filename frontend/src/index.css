@@ -1,0 +1,352 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Interactive Coding Platform Design System */
+
+@layer base {
+  :root {
+    /* Core Colors */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 5% 6%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Brand Colors - Modern Coding Theme */
+    --primary: 263 85% 64%;
+    --primary-foreground: 210 40% 98%;
+    --primary-glow: 263 85% 75%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 142 71% 45%;
+    --accent-foreground: 355.7 100% 97.3%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Interactive Elements */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263 85% 64%;
+
+    /* Coding Specific */
+    --code-bg: 240 10% 5%;
+    --code-border: 240 3.7% 20%;
+    --success: 142 71% 45%;
+    --warning: 48 96% 53%;
+    --info: 199 89% 48%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(263 85% 64%), hsl(263 85% 75%));
+    --gradient-accent: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 71% 55%));
+    --gradient-background: linear-gradient(180deg, hsl(240 10% 3.9%), hsl(240 8% 8%));
+    --gradient-card: linear-gradient(145deg, hsl(240 5% 6%), hsl(240 7% 10%));
+
+    /* Shadows */
+    --shadow-primary: 0 10px 40px -10px hsl(263 85% 64% / 0.3);
+    --shadow-accent: 0 10px 40px -10px hsl(142 71% 45% / 0.3);
+    --shadow-card: 0 8px 32px -8px hsl(240 10% 3.9% / 0.6);
+    --shadow-glow: 0 0 40px hsl(263 85% 75% / 0.4);
+
+    /* Animation */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .light {
+    /* Light Mode Override */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 263 85% 64%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 142 71% 45%;
+    --accent-foreground: 240 10% 3.9%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 263 85% 64%;
+
+    --code-bg: 240 4.8% 95.9%;
+    --code-border: 240 5.9% 90%;
+
+    --gradient-background: linear-gradient(180deg, hsl(0 0% 100%), hsl(240 4.8% 95.9%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(240 4.8% 95.9%));
+
+    /* Sidebar Light Mode Variables */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 10% 3.9%;
+    --sidebar-primary: 263 85% 64%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 240 5.9% 90%;
+    --sidebar-ring: 263 85% 64%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter antialiased;
+    background: var(--gradient-background);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Button Variants */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground shadow-lg;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-primary);
+    transition: var(--transition-smooth);
+  }
+
+  .btn-primary:hover {
+    @apply scale-105;
+    box-shadow: var(--shadow-glow);
+  }
+
+  .btn-accent {
+    @apply bg-accent text-accent-foreground shadow-lg;
+    background: var(--gradient-accent);
+    box-shadow: var(--shadow-accent);
+    transition: var(--transition-smooth);
+  }
+
+  .btn-accent:hover {
+    @apply scale-105;
+  }
+
+  .btn-hero {
+    @apply px-8 py-4 text-lg font-semibold rounded-xl;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-primary);
+    transition: var(--transition-bounce);
+  }
+
+  .btn-hero:hover {
+    @apply scale-110;
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Card Variants */
+  .card-glass {
+    @apply backdrop-blur-lg border border-border/20;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-feature {
+    @apply p-6 rounded-2xl border border-border/20 transition-all duration-300;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-feature:hover {
+    @apply scale-105;
+    box-shadow: var(--shadow-primary);
+  }
+
+  /* Code Editor Styles */
+  .code-editor {
+    @apply font-mono text-sm;
+    background: hsl(var(--code-bg));
+    border: 1px solid hsl(var(--code-border));
+  }
+
+  /* Interactive Elements */
+  .interactive-glow {
+    @apply transition-all duration-300;
+  }
+
+  .interactive-glow:hover {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Animations */
+  .animate-gradient {
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+  }
+
+  @keyframes gradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(60px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Custom Scrollbar Styling - Dark Theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(240 3.7% 15.9%);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(263 85% 64% / 0.6);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(263 85% 64% / 0.8);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: hsl(240 3.7% 15.9%);
+  }
+
+  /* Firefox scrollbar styling - Dark Theme */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(263 85% 64% / 0.6) hsl(240 3.7% 15.9%);
+  }
+
+  /* Light Theme Scrollbar Styling */
+  .light ::-webkit-scrollbar-track {
+    background: hsl(240 4.8% 95.9%);
+  }
+
+  .light ::-webkit-scrollbar-thumb {
+    background: hsl(240 5.9% 70% / 0.6);
+  }
+
+  .light ::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 5.9% 70% / 0.8);
+  }
+
+  .light ::-webkit-scrollbar-corner {
+    background: hsl(240 4.8% 95.9%);
+  }
+
+  /* Firefox scrollbar styling - Light Theme */
+  .light * {
+    scrollbar-color: hsl(240 5.9% 70% / 0.6) hsl(240 4.8% 95.9%);
+  }
+
+  /* Custom Scrollbar for Explanation Box */
+  .explanation-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+  }
+
+  .explanation-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .explanation-scrollbar::-webkit-scrollbar-track {
+    background: hsl(240 3.7% 15.9%);
+    border-radius: 3px;
+    margin: 4px 0;
+  }
+
+  .explanation-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(263 85% 64% / 0.5);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+
+  .explanation-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(263 85% 64% / 0.7);
+  }
+
+  /* Light theme scrollbar for explanation box */
+  .light .explanation-scrollbar::-webkit-scrollbar-track {
+    background: hsl(240 4.8% 95.9%);
+  }
+
+  .light .explanation-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(240 5.9% 70% / 0.5);
+  }
+
+  .light .explanation-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 5.9% 70% / 0.7);
+  }
+
+  .light .explanation-scrollbar {
+    scrollbar-color: hsl(240 5.9% 70% / 0.5) hsl(240 4.8% 95.9%);
+  }
+}
