@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { 
@@ -67,22 +68,14 @@ const LineNumbers = ({ textareaRef, lineNumbersRef }: {
 
 
 const Compiler = () => {
-  const initialCode = `public class HelloWorld {
-    public static void main(String[] args) {
-        System.out.println("Hello, Java!");
-        
-        // Your code here
-        int number = 42;
-        String message = "Welcome to CodeMaster!";
-        
-        System.out.println("Number: " + number);
-        System.out.println("Message: " + message);
-    }
-}`;
+  const navigate = useNavigate();
+  const initialCode = '';
+  const codeStorageKey = 'compiler:code';
+  const outputStorageKey = 'compiler:output';
 
   // Use refs for everything to prevent re-renders
   const codeRef = useRef(initialCode);
-  const [code, setCode] = useState(initialCode); // Keep this for initial render only
+  const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -147,14 +140,14 @@ const Compiler = () => {
 
   // Ultra-simplified code change handler
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    // Only update the ref, no state updates to prevent re-renders
     codeRef.current = e.target.value;
+    setCode(e.target.value);
+    try {
+      localStorage.setItem(codeStorageKey, codeRef.current);
+    } catch (error) {
+      void error;
+    }
   };
-
-  // Basic cursor position tracking
-  const handleCursorChange = useCallback(() => {
-    // Simple implementation without any side effects
-  }, []);
 
   // Simple scroll handler
   const handleScroll = useCallback(() => {
@@ -166,7 +159,8 @@ const Compiler = () => {
   // Real Java compilation and execution using backend API
   const compileAndExecuteJava = async (javaCode: string): Promise<{ success: boolean; output: string; error?: string }> => {
     try {
-      const response = await compilerAPI.compileAndRun(javaCode);
+      const requestId = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const response = await compilerAPI.compileAndRun(javaCode, requestId);
       
       if (response.success) {
         const executionTime = response.execution_time 
@@ -186,11 +180,12 @@ const Compiler = () => {
         const errorMessages = response.errors 
           ? response.errors.map(err => `${err.message} (line ${err.line})`).join('\n')
           : response.error || 'Compilation failed';
+        const errorWithRequest = response.request_id ? `${errorMessages}\n\nRequest ID: ${response.request_id}` : errorMessages;
         
         return {
           success: false,
           output: '',
-          error: errorMessages
+          error: errorWithRequest
         };
       }
     } catch (error) {
@@ -231,6 +226,20 @@ const Compiler = () => {
 
   // Handle fullscreen change events and cleanup
   useEffect(() => {
+    try {
+      const savedCode = localStorage.getItem(codeStorageKey);
+      if (savedCode !== null) {
+        codeRef.current = savedCode;
+        setCode(savedCode);
+      }
+      const savedOutput = localStorage.getItem(outputStorageKey);
+      if (savedOutput) {
+        setOutput(savedOutput);
+      }
+    } catch (error) {
+      void error;
+    }
+
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -262,12 +271,40 @@ const Compiler = () => {
 
   // Enhanced handleRun with real compilation
   const handleRun = async () => {
+    const authToken = localStorage.getItem("access_token");
+    if (!authToken) {
+      setExecutionStatus('error');
+      const message = 'Missing Authorization Header. Please log in again.';
+      setOutput(message);
+      try {
+        localStorage.setItem(outputStorageKey, message);
+      } catch (error) {
+        void error;
+      }
+      toast({
+        title: "Login required",
+        description: "Please log in to run code.",
+        variant: "destructive"
+      });
+      navigate('/login');
+      return;
+    }
     setIsRunning(true);
     setExecutionStatus('idle');
     setOutput('Compiling...\n');
+    try {
+      localStorage.setItem(outputStorageKey, 'Compiling...\n');
+    } catch (error) {
+      void error;
+    }
     
     // Get current code from textarea ref
     const currentCode = textareaRef.current?.value || codeRef.current;
+    try {
+      localStorage.setItem(codeStorageKey, currentCode);
+    } catch (error) {
+      void error;
+    }
     
     try {
       const result = await compileAndExecuteJava(currentCode);
@@ -275,6 +312,11 @@ const Compiler = () => {
       if (result.success) {
         setOutput(result.output);
         setExecutionStatus('success');
+        try {
+          localStorage.setItem(outputStorageKey, result.output);
+        } catch (error) {
+          void error;
+        }
         toast({
           title: "Compilation successful!",
           description: "Your Java code executed successfully."
@@ -282,6 +324,11 @@ const Compiler = () => {
       } else {
         setOutput(result.error || 'Compilation failed');
         setExecutionStatus('error');
+        try {
+          localStorage.setItem(outputStorageKey, result.error || 'Compilation failed');
+        } catch (error) {
+          void error;
+        }
         toast({
           title: "Compilation failed",
           description: "Please check your code for errors.",
@@ -291,6 +338,11 @@ const Compiler = () => {
     } catch (error) {
       setOutput(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setExecutionStatus('error');
+      try {
+        localStorage.setItem(outputStorageKey, `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      } catch (storageError) {
+        void storageError;
+      }
       toast({
         title: "Execution error",
         description: "An unexpected error occurred.",
@@ -484,11 +536,11 @@ const Compiler = () => {
                     
                     <textarea 
                       ref={textareaRef}
-                      defaultValue={initialCode}
+                      value={code}
                       onChange={handleCodeChange}
                       onScroll={handleScroll}
                       className="relative w-full h-full resize-none border-0 bg-black font-mono text-xs sm:text-sm leading-5 sm:leading-6 p-1 sm:p-2 md:p-3 lg:p-4 focus:ring-0 focus:outline-none focus:border-transparent placeholder:text-muted-foreground/50 overflow-y-auto z-10" 
-                      placeholder="// Start coding here..."
+                      placeholder="Type or paste Java code here..."
                       style={{ 
                         minHeight: '100%', 
                         boxShadow: 'none',

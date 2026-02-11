@@ -5,23 +5,27 @@ import tempfile
 import re
 import time
 import docker
+import requests
 from typing import Dict, List, Optional
 from app.config import Config
+import logging
 
 class JavaExecutor:
     """Execute Java code using OpenJDK with error detection and parsing"""
     
     def __init__(self):
+        self.logger = logging.getLogger('java_executor')
         self.use_docker = os.getenv('USE_DOCKER', 'true').lower() == 'true'
         self.timeout = int(os.getenv('JAVA_TIMEOUT', 10))
         self.memory_limit = os.getenv('JAVA_MEMORY_LIMIT', '128m')
+        self.cpu_limit = float(os.getenv('JAVA_CPU_LIMIT', 0.5))
         
         if self.use_docker:
             try:
                 self.docker_client = docker.from_env()
-                self.docker_image = os.getenv('DOCKER_IMAGE', 'CodeMaster-java-executor:latest')
+                self.docker_image = os.getenv('DOCKER_IMAGE', 'codemaster-java17:local').lower()
             except Exception as e:
-                print(f"Warning: Docker not available: {e}. Falling back to subprocess.")
+                self.logger.warning(f"Docker not available: {e}. Falling back to subprocess.")
                 self.use_docker = False
         
         if not self.use_docker:
@@ -58,9 +62,12 @@ class JavaExecutor:
             return self._execute_with_subprocess(java_code)
     
     def _extract_class_name(self, java_code: str) -> str:
-        """Extract public class name from Java code"""
+        """Extract class name from Java code"""
         match = re.search(r'public\s+class\s+(\w+)', java_code)
-        return match.group(1) if match else 'Main'
+        if match:
+            return match.group(1)
+        fallback = re.search(r'\bclass\s+(\w+)', java_code)
+        return fallback.group(1) if fallback else 'Main'
     
     def _parse_compiler_errors(self, error_output: str) -> List[Dict]:
         """Parse javac error output into structured error objects"""
@@ -121,25 +128,40 @@ class JavaExecutor:
         container = None
         
         try:
+            nano_cpus = int(self.cpu_limit * 1_000_000_000) if self.cpu_limit > 0 else None
             container = self.docker_client.containers.create(
                 image=self.docker_image,
-                command=f"javac -d /app/execute {class_name}.java 2>&1",
-                volumes={code_dir: {'bind': '/app/source', 'mode': 'ro'}},
-                working_dir='/app/source',
+                command=["/opt/jdk-17.0.12/bin/javac", "-d", "/app/workspace", f"{class_name}.java"],
+                volumes={code_dir: {'bind': '/app/workspace', 'mode': 'rw'}},
+                working_dir='/app/workspace',
                 mem_limit=self.memory_limit,
+                nano_cpus=nano_cpus,
                 network_disabled=True,
                 read_only=True,
                 tmpfs={'/tmp': 'size=50m'},
+                user="0",
                 detach=True
             )
             
             container.start()
-            result = container.wait(timeout=self.timeout)
-            exit_code = result['StatusCode']
+            try:
+                result = container.wait(timeout=self.timeout)
+                exit_code = result['StatusCode']
+            except requests.exceptions.ReadTimeout:
+                container.kill()
+                container.remove(force=True)
+                return {
+                    "success": False,
+                    "errors": [{"type": "timeout", "line": 0, "column": 0,
+                               "message": f"Compilation timeout ({self.timeout}s)"}],
+                    "compilation_time": time.time() - start_time
+                }
             logs = container.logs(stdout=True, stderr=True).decode('utf-8')
             container.remove()
             
             errors = self._parse_compiler_errors(logs) if exit_code != 0 else []
+            if exit_code != 0 and not errors:
+                errors = [{"type": "compilation_error", "line": 0, "column": 0, "message": logs.strip() or "Compilation failed"}]
             
             return {
                 "success": exit_code == 0,
@@ -147,6 +169,7 @@ class JavaExecutor:
                 "compilation_time": time.time() - start_time
             }
         except docker.errors.ImageNotFound:
+            self.logger.error(f"Docker image not found: {self.docker_image}")
             return {
                 "success": False,
                 "errors": [{"type": "system_error", "line": 0, "column": 0,
@@ -154,6 +177,7 @@ class JavaExecutor:
                 "compilation_time": time.time() - start_time
             }
         except Exception as e:
+            self.logger.error(f"Docker compile error: {e}")
             if container:
                 try:
                     container.remove()
@@ -171,30 +195,53 @@ class JavaExecutor:
         container = None
         
         try:
+            nano_cpus = int(self.cpu_limit * 1_000_000_000) if self.cpu_limit > 0 else None
             container = self.docker_client.containers.create(
                 image=self.docker_image,
-                command=f"timeout {self.timeout} java -cp /app/execute {class_name} 2>&1",
-                volumes={code_dir: {'bind': '/app/source', 'mode': 'ro'}},
-                working_dir='/app/execute',
+                command=["/opt/jdk-17.0.12/bin/java", "-cp", "/app/workspace", class_name],
+                volumes={code_dir: {'bind': '/app/workspace', 'mode': 'rw'}},
+                working_dir='/app/workspace',
                 mem_limit=self.memory_limit,
+                nano_cpus=nano_cpus,
                 network_disabled=True,
                 read_only=True,
                 tmpfs={'/tmp': 'size=50m'},
+                user="0",
                 detach=True
             )
             
             container.start()
-            result = container.wait(timeout=self.timeout + 2)
-            exit_code = result['StatusCode']
+            try:
+                result = container.wait(timeout=self.timeout)
+                exit_code = result['StatusCode']
+            except requests.exceptions.ReadTimeout:
+                container.kill()
+                container.remove(force=True)
+                return {
+                    "success": False,
+                    "output": "",
+                    "errors": [{"type": "timeout", "line": 0, "column": 0,
+                               "message": f"Execution timeout ({self.timeout}s)"}],
+                    "execution_time": time.time() - start_time
+                }
             logs = container.logs(stdout=True, stderr=True).decode('utf-8')
             container.remove()
+            if exit_code == 0:
+                return {
+                    "success": True,
+                    "output": logs,
+                    "execution_time": time.time() - start_time
+                }
             
+            error_message = logs.strip() or "Execution failed with non-zero exit code"
             return {
-                "success": exit_code == 0,
+                "success": False,
                 "output": logs,
+                "errors": [{"type": "runtime_error", "line": 0, "column": 0, "message": error_message}],
                 "execution_time": time.time() - start_time
             }
         except Exception as e:
+            self.logger.error(f"Docker execute error: {e}")
             if container:
                 try:
                     container.remove()

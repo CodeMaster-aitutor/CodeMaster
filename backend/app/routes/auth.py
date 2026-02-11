@@ -69,8 +69,8 @@ def register():
         db.session.commit()
         
         # Create tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'message': 'User registered successfully',
@@ -109,8 +109,8 @@ def login():
         db.session.commit()
         
         # Create tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'message': 'Login successful',
@@ -128,13 +128,14 @@ def refresh():
     """Refresh JWT token endpoint"""
     try:
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
+        user_id = int(current_user_id) if isinstance(current_user_id, str) and current_user_id.isdigit() else current_user_id
+        user = db.session.get(User, user_id)
         
         if not user:
             return jsonify({'error': 'User not found'}), 404
         
         # Create new access token
-        access_token = create_access_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
         
         return jsonify({
             'access_token': access_token

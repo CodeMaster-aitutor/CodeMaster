@@ -12,7 +12,8 @@ def token_required(f):
         try:
             verify_jwt_in_request()
             current_user_id = get_jwt_identity()
-            current_user = User.query.get(current_user_id)
+            user_id = int(current_user_id) if isinstance(current_user_id, str) and current_user_id.isdigit() else current_user_id
+            current_user = db.session.get(User, user_id)
             
             if not current_user:
                 return jsonify({'error': 'User not found'}), 404
@@ -30,6 +31,7 @@ def get_current_user():
     try:
         verify_jwt_in_request()
         user_id = get_jwt_identity()
-        return User.query.get(user_id)
+        resolved_id = int(user_id) if isinstance(user_id, str) and user_id.isdigit() else user_id
+        return db.session.get(User, resolved_id)
     except Exception:
         return None

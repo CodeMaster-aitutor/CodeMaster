@@ -5,6 +5,8 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from app.config import config
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -19,6 +21,21 @@ def create_app(config_name=None):
     # Load configuration
     config_name = config_name or os.getenv('FLASK_ENV', 'development')
     app.config.from_object(config[config_name])
+
+    log_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')
+    try:
+        os.makedirs(log_dir, exist_ok=True)
+    except Exception:
+        log_dir = None
+    log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+    app.logger.setLevel(getattr(logging, log_level, logging.INFO))
+    if log_dir and not app.testing:
+        log_path = os.path.join(log_dir, 'backend.log')
+        handler = RotatingFileHandler(log_path, maxBytes=2_000_000, backupCount=3)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(message)s')
+        handler.setFormatter(formatter)
+        if not any(isinstance(h, RotatingFileHandler) for h in app.logger.handlers):
+            app.logger.addHandler(handler)
     
     # Initialize extensions
     db.init_app(app)

@@ -28,7 +28,7 @@ const Settings = () => {
     streakReminders: true
   });
 
-  const updateSettings = (key: string, value: any) => {
+  const updateSettings = <K extends keyof typeof settings>(key: K, value: (typeof settings)[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 

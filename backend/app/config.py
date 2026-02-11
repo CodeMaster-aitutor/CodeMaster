@@ -36,13 +36,15 @@ class Config:
     
     # Java Execution
     USE_DOCKER = os.getenv('USE_DOCKER', 'true').lower() == 'true'
-    DOCKER_IMAGE = os.getenv('DOCKER_IMAGE', 'CodeMaster-java-executor:latest')
+    DOCKER_IMAGE = os.getenv('DOCKER_IMAGE', 'codemaster-java17:local')
     JAVA_TIMEOUT = int(os.getenv('JAVA_TIMEOUT', 10))
     JAVA_MEMORY_LIMIT = os.getenv('JAVA_MEMORY_LIMIT', '128m')
     JAVA_CPU_LIMIT = float(os.getenv('JAVA_CPU_LIMIT', 0.5))
     OPENJDK_VERSION = os.getenv('OPENJDK_VERSION', '17')
     JAVAC_PATH = os.getenv('JAVAC_PATH', 'javac')
     JAVA_PATH = os.getenv('JAVA_PATH', 'java')
+    MAX_CODE_LENGTH = int(os.getenv('MAX_CODE_LENGTH', 20000))
+    ALERT_WEBHOOK_URL = os.getenv('ALERT_WEBHOOK_URL', '')
     
     # Google OAuth Configuration
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
