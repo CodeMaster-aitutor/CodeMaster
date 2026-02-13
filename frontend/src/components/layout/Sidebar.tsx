@@ -169,9 +169,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
                   <p className="text-xs text-white/80 mb-3">
                     Unlock unlimited challenges and AI features
                   </p>
-                  <Button size="sm" className="w-full bg-white text-primary font-medium transition-colors hover:bg-white/90">
-                    Upgrade Now
-                  </Button>
+                  <Link
+                    to="/upgrade"
+                    onClick={() => {
+                      if (window.innerWidth < 1024) {
+                        onClose();
+                      }
+                    }}
+                  >
+                    <Button size="sm" className="w-full bg-white text-primary font-medium transition-colors hover:bg-white/90">
+                      Upgrade Now
+                    </Button>
+                  </Link>
                 </div>
               </div>
             )}

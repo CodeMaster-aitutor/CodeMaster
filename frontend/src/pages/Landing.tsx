@@ -104,9 +104,18 @@ const Landing = () => {
             </div>
             
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
-              <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-              <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
+              <a
+                href="/"
+                onClick={(event) => {
+                  event.preventDefault();
+                  window.location.assign("/");
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Home
+              </a>
+              <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
+              <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -286,6 +295,13 @@ const Landing = () => {
                 <Button className="w-full" variant="outline">Contact Sales</Button>
               </div>
             </Card>
+          </div>
+          <div className="mt-10 flex justify-center">
+            <Link to="/pricing">
+              <Button variant="outline" className="px-8">
+                View Full Pricing
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
