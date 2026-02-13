@@ -102,6 +102,18 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith('compiler:state:')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('compiler:state:') || key === 'compiler:code' || key === 'compiler:code-fallback') {
+        localStorage.removeItem(key);
+      }
+    });
+    sessionStorage.removeItem('compiler:output');
+    sessionStorage.removeItem('compiler:session-id');
     
     toast({
       title: "Logged out successfully",
