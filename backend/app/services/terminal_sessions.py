@@ -142,7 +142,7 @@ class TerminalSessionManager:
             # Create container with unbuffered output to ensure prompts appear immediately
             container = self.docker_client.containers.create(
                 image=self.image,
-                command=["/usr/bin/stdbuf", "-o0", "-e0", "/opt/jdk-17.0.12/bin/java", "-cp", "/app/workspace", class_name],
+                command=["/usr/bin/script", "-qfc", f"/usr/bin/stdbuf -o0 -e0 /opt/jdk-17.0.12/bin/java -cp /app/workspace {class_name}", "/dev/null"],
                 volumes={temp_dir: {"bind": "/app/workspace", "mode": "rw"}},
                 working_dir="/app/workspace",
                 mem_limit=self.memory_limit,
